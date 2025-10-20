@@ -1,0 +1,10 @@
+^C:\USERS\LALO\DOCUMENTS\COMPUTOGRAFICO_ANGELEDUARDO_17867\LIBS\GLFW\SRC\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Lalo/Documents/ComputoGrafico_AngelEduardo_17867/Libs/glfw -BC:/Users/Lalo/Documents/ComputoGrafico_AngelEduardo_17867/Libs/glfw --check-stamp-file C:/Users/Lalo/Documents/ComputoGrafico_AngelEduardo_17867/Libs/glfw/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
