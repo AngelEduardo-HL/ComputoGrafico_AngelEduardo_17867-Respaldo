@@ -218,7 +218,24 @@ void Application::keyCallBack(int key, int scancode, int action, int mods)
 		std::cout << "Mover a la izquierda" << std::endl;
 	}
 
-	//Tecla para cambiar de geometria (De cubo a Triangulo)
+	//Tecla para cambiar de geometrias
+	if (key == GLFW_KEY_R && (action == GLFW_PRESS || action == GLFW_REPEAT))
+	{
+		//Cambia a false y true para alternar entre los programas de shaders
+		currentProgram = !currentProgram;
+		if (currentProgram)
+		{
+			currentProgram = ids["program"];
+			currentProgram = true;
+			std::cout << "Programa 1 activado" << std::endl;
+		}
+		else
+		{
+			currentProgram = ids["program2"];
+			currentProgram = false;
+			std::cout << "Programa 2 activado" << std::endl;
+		}
+	}
 }
 
 void Application::mouseCallBack(double mouseX, double mouseY)
@@ -291,7 +308,7 @@ void Application::Update()
 
 void Application::Draw()
 {
-	glUseProgram(ids["program2"]); //Uso el programa de shaders
+	glUseProgram(currentProgram); //Uso el programa de shaders
 	glBindVertexArray(ids["cubo"]); //Digo que geometria voy a usar
 	
 	glUniform1f(ids["time2"], time); //Paso el valor de time al shader
@@ -301,6 +318,8 @@ void Application::Draw()
 	glUniformMatrix4fv(ids["camera"], 1, GL_FALSE, &camera[0][0]); //Paso la matriz de la camara al shader
 	glUniformMatrix4fv(ids["projection"], 1, GL_FALSE, &projection[0][0]); //Paso la matriz de proyeccion al shader
 
+
+	
 	//Dibujo la geometria del cubo
 	glDrawArrays(GL_TRIANGLES, 0, 36); //Dibujo el cubo 
 }
