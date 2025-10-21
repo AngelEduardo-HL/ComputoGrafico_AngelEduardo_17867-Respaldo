@@ -44,7 +44,8 @@ int main(void)
 
     glfwSetKeyCallback(app.window, AppCloseCallBack);
 	glfwSetCursorPosCallback(app.window, AppMouseCallBack);
-    glfwSetScrollCallback(app.window, AppScrollCallback);
+	glfwSetScrollCallback(app.window, AppScrollCallback);
+
 
 	app.Setup();
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

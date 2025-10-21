@@ -6,60 +6,77 @@
 void Application::SetUpCubeGeometry()
 {
 	std::vector<float> geometry = {
-	//Frente
-	 -1.0f, -1.0f,  1.0f, 1.0f,
-	  1.0f, -1.0f,  1.0f, 1.0f,
-	 -1.0f,  1.0f,  1.0f, 1.0f,
-	  1.0f,  1.0f,  1.0f, 1.0f,
+	//Cara Frontal
+	 -1.0f, 1.0f, 1.0f, 1.0f, //0
+	 -1.0f, -1.0f, 1.0f, 1.0f, //1
+	 1.0f, -1.0f, 1.0f, 1.0f,  //2
+	 -1.0f, 1.0f, 1.0f, 1.0f, //0
+	 1.0f, -1.0f, 1.0f, 1.0f, //1
+	 1.0f, 1.0f, 1.0f, 1.0f, //3
 
-	//Atrás
-	 -1.0f, -1.0f, -1.0f, 1.0f,
-	 1.0f, -1.0f, -1.0f, 1.0f,
-	 -1.0f,  1.0f, -1.0f, 1.0f,
-	 1.0f,  1.0f, -1.0f, 1.0f,
+	 //Cara - Atras
+	 1.0f, 1.0f, -1.0f, 1.0f, //4
+	 1.0f, -1.0f, -1.0f, 1.0f, //5
+	 -1.0f, -1.0f, -1.0f, 1.0f, //6
+	 1.0f, 1.0f, -1.0f, 1.0f, //4
+	 -1.0f, -1.0f, -1.0f, 1.0f, //5
+	 -1.0f, 1.0f, -1.0f, 1.0f, //6
 
-	//Izquierda
-	 -1.0f, -1.0f, -1.0f, 1.0f,
-	 -1.0f, -1.0f,  1.0f, 1.0f,
-	 -1.0f,  1.0f, -1.0f, 1.0f,
-	 -1.0f,  1.0f,  1.0f, 1.0f,
+	 //Cara - Izquierda
+	 -1.0f, 1.0f, -1.0f, 1.0f, //8
+	 -1.0f, -1.0f, -1.0f, 1.0f, //9
+	 -1.0f, -1.0f, 1.0f, 1.0f, //10
+	 -1.0f, 1.0f, -1.0f, 1.0f, //8
+	 -1.0f, -1.0f, 1.0f, 1.0f, //9
+	 -1.0f, 1.0f, 1.0f, 1.0f, //10
 
-	//Derecha 
-	 1.0f, -1.0f,  1.0f, 1.0f,
-	 1.0f, -1.0f, -1.0f, 1.0f,
-	 1.0f,  1.0f,  1.0f, 1.0f,
-	 1.0f,  1.0f, -1.0f, 1.0f,
+	 //Cara - Derecha
+	 1.0f, 1.0f, 1.0f, 1.0f, //12
+	 1.0f, -1.0f, 1.0f, 1.0f, //13
+	 1.0f, -1.0f, -1.0f, 1.0f, //14
+	 1.0f, 1.0f, 1.0f, 1.0f, //12
+	 1.0f, -1.0f, -1.0f, 1.0f, //13
+	 1.0f, 1.0f, -1.0f, 1.0f, //14
 
-	//Arriba
-	 -1.0f,  1.0f,  1.0f, 1.0f,
-	 1.0f,  1.0f,  1.0f, 1.0f,
-	 -1.0f,  1.0f, -1.0f, 1.0f,
-	 1.0f,  1.0f, -1.0f, 1.0f,
+	 //Cara - Arriba
+	 -1.0f, 1.0f, -1.0f, 1.0f, //16
+	 -1.0f, 1.0f, 1.0f, 1.0f, //17
+	 1.0f, 1.0f, 1.0f, 1.0f, //18
+	 -1.0f, 1.0f, -1.0f, 1.0f, //16
+	 1.0f, 1.0f, 1.0f, 1.0f, //17
+	 1.0f, 1.0f, -1.0f, 1.0f, //18
 
-	//Abajo
-	 -1.0f, -1.0f, -1.0f, 1.0f,
-	 1.0f, -1.0f, -1.0f, 1.0f,
-	 -1.0f, -1.0f,  1.0f, 1.0f,
-	 1.0f, -1.0f,  1.0f, 1.0f,
+	 //Cara - Abajo
+	 -1.0f, -1.0f, 1.0f, 1.0f, //20
+	 -1.0f, -1.0f, -1.0f, 1.0f, //21
+	 1.0f, -1.0f, -1.0f, 1.0f, //22
+	 -1.0f, -1.0f, 1.0f, 1.0f, //20
+	 1.0f, -1.0f, -1.0f, 1.0f, //21
+	 1.0f, -1.0f, 1.0f, 1.0f, //22
 
-		 
+
 	 //Colores
-
-	// Frente - Rojo
+	 // Frente - Rojo
 	 1.0f, 0.0f, 0.0f, 1.0f, // V0
 	 1.0f, 0.0f, 0.0f, 1.0f, // V1
 	 1.0f, 0.0f, 0.0f, 1.0f, // V2
 	 1.0f, 0.0f, 0.0f, 1.0f, // V3
+	 1.0f, 0.0f, 0.0f, 1.0f, // V2
+	 1.0f, 0.0f, 0.0f, 1.0f, // V3
 
-	// Atras - Verde
+	 // Atras - Verde
 	 0.0f, 1.0f, 0.0f, 1.0f, // V4
 	 0.0f, 1.0f, 0.0f, 1.0f, // V5
 	 0.0f, 1.0f, 0.0f, 1.0f, // V6
 	 0.0f, 1.0f, 0.0f, 1.0f, // V7
+	 0.0f, 1.0f, 0.0f, 1.0f, // V6
+	 0.0f, 1.0f, 0.0f, 1.0f, // V7
 
-	//Izquierda - Azul
+	 //Izquierda - Azul
 	 0.0f, 0.0f, 1.0f, 1.0f, // V8
 	 0.0f, 0.0f, 1.0f, 1.0f, // V9
+	 0.0f, 0.0f, 1.0f, 1.0f, // V10
+	 0.0f, 0.0f, 1.0f, 1.0f, // V11
 	 0.0f, 0.0f, 1.0f, 1.0f, // V10
 	 0.0f, 0.0f, 1.0f, 1.0f, // V11
 
@@ -68,20 +85,24 @@ void Application::SetUpCubeGeometry()
 	 1.0f, 1.0f, 0.0f, 1.0f, // V13
 	 1.0f, 1.0f, 0.0f, 1.0f, // V14
 	 1.0f, 1.0f, 0.0f, 1.0f, // V15
+	 1.0f, 1.0f, 0.0f, 1.0f, // V14
+	 1.0f, 1.0f, 0.0f, 1.0f, // V15
 
-	//Arriba - Cyan
+	 //Arriba - Cyan
 	 0.0f, 1.0f, 1.0f, 1.0f, // V16
 	 0.0f, 1.0f, 1.0f, 1.0f, // V17
 	 0.0f, 1.0f, 1.0f, 1.0f, // V18
 	 0.0f, 1.0f, 1.0f, 1.0f, // V19
+	 0.0f, 1.0f, 1.0f, 1.0f, // V18
+	 0.0f, 1.0f, 1.0f, 1.0f, // V19
 
-	//Abajo - Magenta
+	 //Abajo - Magenta
 	 1.0f, 0.0f, 1.0f, 1.0f, // V20
 	 1.0f, 0.0f, 1.0f, 1.0f, // V21
 	 1.0f, 0.0f, 1.0f, 1.0f, // V22
+	 1.0f, 0.0f, 1.0f, 1.0f,  // V23
+	 1.0f, 0.0f, 1.0f, 1.0f, // V22
 	 1.0f, 0.0f, 1.0f, 1.0f  // V23
-
-
 	};
 	//Crear VAO
 	GLuint VAO, VBO;
@@ -105,34 +126,36 @@ void Application::SetUpCubeGeometry()
 	glEnableVertexAttribArray(0);
 
 	//Colores
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const void*)((16 * 6) * sizeof(float))); //(index, size, type, normalized, stride, pointer)
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const void*)((144) * sizeof(float))); //(index, size, type, normalized, stride, pointer)
 	glEnableVertexAttribArray(1);
 }
 
-// Refactorizacion de la Geometria que estaba en Setup
+//Geometria para el Triangulo3D
 void Application::SetUpGeometry()
 {
-	//Arreglo de vertices y colores del cuadrado
+	//Arreglo de vertices y colores del Triangulo
 	std::vector<float> geometry
 	{
 		//X,    Y,    Z,    W
-		//Cuadrado
-		-1.0f, -1.0f, 0.0f, 1.0f, //Vertice 1
-		-1.0f,  1.0f, 0.0f, 1.0f, //Vertice 2
-		 1.0f, -1.0f, 0.0f, 1.0f, //Vertice 3
-		 1.0f,  1.0f, 0.0f, 1.0f, //Vertice 4
+		//Triangulo 3D
 
+		//Base del Traingulo (Cara inferior)
+		-1.0f, -1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f, 1.0f,
 
-		1.0f, 0.0f, 0.0f, 1.0f,   //Color Rojo Vertice 1
-		0.0f, 1.0f, 0.0f, 1.0f,   //Color Verde Vertice 2
-		0.0f, 0.0f, 1.0f, 1.0f,    //Color Azul Vertice 3
-		1.0f, 1.0f, 0.0f, 1.0f    //Color Amarillo Vertice 4
+		//Vertice frontal
+
+		//Colores
 	};
 
 	//Crear VAO
 	GLuint VAO, VBO;
 	glGenVertexArrays(1, &VAO);
-	ids["cuadrado"] = VAO;
+	ids["Triangulo"] = VAO;
 
 	glBindVertexArray(VAO);
 
@@ -151,7 +174,7 @@ void Application::SetUpGeometry()
 	glEnableVertexAttribArray(0);
 
 	//Colores
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const void*)(16*sizeof(float))); //(index, size, type, normalized, stride, pointer)
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const void*)((72) * sizeof(float))); //(index, size, type, normalized, stride, pointer)
 	glEnableVertexAttribArray(1);
 }
 
@@ -194,6 +217,8 @@ void Application::keyCallBack(int key, int scancode, int action, int mods)
 		DesX -= 0.01f;
 		std::cout << "Mover a la izquierda" << std::endl;
 	}
+
+	//Tecla para cambiar de geometria (De cubo a Triangulo)
 }
 
 void Application::mouseCallBack(double mouseX, double mouseY)
@@ -223,8 +248,17 @@ void Application::mouseCallBack(double mouseX, double mouseY)
 
 void Application::MouseScrollCallback(double xoffset, double yoffset)
 {
-	float factor = std::pow(zoomSensitivity, static_cast<float>(yoffset));
-	zoom *= factor;
+	//Hace zoom modificado el Eye de la camara
+	if (yoffset > 0) // Zoom in
+	{
+		zoom /= zoomSensitivity;
+	}
+	else if (yoffset < 0) // Zoom out
+	{
+		zoom *= zoomSensitivity;
+	}
+
+	zoom = glm::clamp(zoom, 0.1f, 10.0f); // Limitar el zoom
 
 	std::cout << "Zoom: " << zoom << std::endl;
 }
@@ -242,12 +276,12 @@ void Application::Setup()
 void Application::Update()
 {
 	time += 0.01f;
-	eye = glm::vec3(2.0f, 2.0f, 2.0f);
+	eye = glm::vec3(2.0f, 2.0f, 2.0f) * zoom;
 	center = glm::vec3(0.0f, 0.0f, 0.0f);
 	camera = glm::lookAt(eye, center, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//Transformaciones del modelo
-	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.5f, 1.0f) * zoom);
+	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 	glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	glm::mat4 rotateX = glm::rotate(glm::mat4(1.0f), glm::radians(pitch), glm::vec3(1.0f, 0.0f, 0.0f)); //Eje X
 	glm::mat4 rotateY = glm::rotate(glm::mat4(1.0f), glm::radians(yaw), glm::vec3(0.0f, 1.0f, 0.0f)); //Eje Y
@@ -268,5 +302,5 @@ void Application::Draw()
 	glUniformMatrix4fv(ids["projection"], 1, GL_FALSE, &projection[0][0]); //Paso la matriz de proyeccion al shader
 
 	//Dibujo la geometria del cubo
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 29); //Dibujo el cubo 
+	glDrawArrays(GL_TRIANGLES, 0, 36); //Dibujo el cubo 
 }

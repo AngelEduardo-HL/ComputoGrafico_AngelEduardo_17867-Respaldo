@@ -24,11 +24,13 @@ private:
 	float DesX{ 0.0f }; // Variable para controlar el desplazamiento en X
 	float time{ 0.0f }; // Variable para controlar el tiempo
 
-	float mouseSensitivity = 2.5f; // Sensibilidad del mouse
+	float mouseSensitivity = 1.5f; // Sensibilidad del mouse
 	float yaw = 0.0f;     // grados, rotación sobre Y
 	float pitch = 0.0f;   // grados, rotación sobre X
 	float yawRangeDeg = 180.0f; // de borde a borde de ventana
-	float pitchRangeDeg = 90.0f;  // de borde a borde de ventana
+	float pitchRangeDeg = 180.0f;  // de borde a borde de ventana
+
+	bool currentProgram = true; // Programa actual (true: programa 1, false: programa 2)
 
 	float zoom = 2.0f; // Escala acual del cubo
 	float zoomSensitivity = 1.1f; // Sensibilidad del zoom
