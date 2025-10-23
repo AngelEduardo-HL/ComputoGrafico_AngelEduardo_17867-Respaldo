@@ -131,50 +131,91 @@ void Application::SetUpCubeGeometry()
 }
 
 //Geometria para el Triangulo3D
-void Application::SetUpGeometry()
+void Application::SetUpTriangleGeometry()
 {
-	//Arreglo de vertices y colores del Triangulo
-	std::vector<float> geometry
-	{
-		//X,    Y,    Z,    W
-		//Triangulo 3D
+	// 6 triángulos * 3 vértices = 18 vértices
+	// Cada vértice lleva (x, y, z, w)
+	std::vector<float> geometry = {
 
-		//Base del Traingulo (Cara inferior)
-		-1.0f, -1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f, 1.0f,
+	 // Vértices
+	
+	// Base del triángulo
+	 -1.0f, -1.0f,  1.0f, 1.0f,
+	  1.0f, -1.0f,  1.0f, 1.0f,
+	  0.0f,  1.0f,  0.0f, 1.0f,
 
-		//Vertice frontal
+	//Derecha
+	 1.0f, -1.0f,  1.0f, 1.0f,
+	 1.0f, -1.0f, -1.0f, 1.0f,
+	 0.0f,  1.0f,  0.0f, 1.0f,
 
-		//Colores
+	 //Atras
+	  1.0f, -1.0f, -1.0f, 1.0f,
+	 -1.0f, -1.0f, -1.0f, 1.0f,
+	  0.0f,  1.0f,  0.0f, 1.0f,
+
+	  //Izquierda
+	 -1.0f, -1.0f, -1.0f, 1.0f,
+	 -1.0f, -1.0f,  1.0f, 1.0f,
+	 0.0f,  1.0f,  0.0f, 1.0f,
+
+	 //Base
+	 -1.0f, -1.0f,  1.0f, 1.0f,
+	  1.0f, -1.0f,  1.0f, 1.0f,
+	  1.0f, -1.0f, -1.0f, 1.0f,
+	  
+	 -1.0f, -1.0f,  1.0f, 1.0f,
+	  1.0f, -1.0f, -1.0f, 1.0f,
+	 -1.0f, -1.0f, -1.0f, 1.0f,
+
+
+	 1.0f, 0.0f, 0.0f, 1.0f,
+	 1.0f, 0.0f, 0.0f, 1.0f,
+	 1.0f, 0.0f, 0.0f, 1.0f,
+
+	 0.0f, 1.0f, 0.0f, 1.0f,
+	 0.0f, 1.0f, 0.0f, 1.0f,
+	 0.0f, 1.0f, 0.0f, 1.0f,
+
+	 0.0f, 0.0f, 1.0f, 1.0f,
+	 0.0f, 0.0f, 1.0f, 1.0f,
+	 0.0f, 0.0f, 1.0f, 1.0f,
+
+	 1.0f, 1.0f, 0.0f, 1.0f,
+	 1.0f, 1.0f, 0.0f, 1.0f,
+	 1.0f, 1.0f, 0.0f, 1.0f,
+
+	 1.0f, 0.0f, 1.0f, 1.0f,
+	 1.0f, 0.0f, 1.0f, 1.0f,
+	 1.0f, 0.0f, 1.0f, 1.0f,
+	 
+	 1.0f, 0.0f, 1.0f, 1.0f,
+	 1.0f, 0.0f, 1.0f, 1.0f,
+	 1.0f, 0.0f, 1.0f, 1.0f
 	};
 
-	//Crear VAO
+	// Crear VAO/VBO
 	GLuint VAO, VBO;
 	glGenVertexArrays(1, &VAO);
-	ids["Triangulo"] = VAO;
+	ids["triangulo"] = VAO;
 
 	glBindVertexArray(VAO);
 
-	//Crear VBO vertices
 	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Esto aun no manda nada a la GPU
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	//Pasar arreglo de vertices a la memoria de la GPU
 	glBufferData(GL_ARRAY_BUFFER,
-		sizeof(GLfloat) * geometry.size(), //Calculo el tamaño en bytes del arreglo
-		&geometry[0],
-		GL_STATIC_DRAW); //Mandamos la geometria el Buffer
+		sizeof(GLfloat) * geometry.size(),
+		geometry.data(),
+		GL_STATIC_DRAW);
 
-	//Vertices
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); //(index, size, type, normalized, stride, pointer)
+	// Atributo 0: posiciones (vec4)
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const void*)0);
 	glEnableVertexAttribArray(0);
 
-	//Colores
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const void*)((72) * sizeof(float))); //(index, size, type, normalized, stride, pointer)
+	// Atributo 1: colores (vec4)
+	// Offset = 72 floats (18 vértices * 4 componentes)
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const void*)(72 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 }
 
@@ -182,7 +223,11 @@ void Application::SetUpProgram1()
 {
 	GLuint ShadersID = InitializeProgramFromFiles("Shaders/VertextShader.glsl", "Shaders/FragmentShader.glsl"); //Cargo y compilo los shaders
 	ids["program"] = ShadersID; //Guardo el ID del programa de shaders
-	ids["time"] = glGetUniformLocation(ids["program"], "time"); //Obtengo la localizacion de la variable time en el shader
+	ids["time1"] = glGetUniformLocation(ids["program"], "time"); //Obtengo la localizacion de la variable time en el shader
+	ids["DesX1"] = glGetUniformLocation(ids["program"], "DesX");
+	ids["camera1"] = glGetUniformLocation(ids["program"], "camera");
+	ids["projection1"] = glGetUniformLocation(ids["program"], "projection");
+	ids["model1"] = glGetUniformLocation(ids["program"], "model");
 }
 
 //lo mismo que el 1 pero con la camara y proyeccion
@@ -191,10 +236,10 @@ void Application::SetUpProgram2()
 	GLuint ShadersID = InitializeProgramFromFiles("Shaders/VertextCamera.glsl", "Shaders/FragmentShaderCamera.glsl"); //Cargo y compilo los shaders
 	ids["program2"] = ShadersID; //Guardo el ID del programa de shaders
 	ids["time2"] = glGetUniformLocation(ids["program2"], "time");
-	ids["DesX"] = glGetUniformLocation(ids["program2"], "DesX"); 
-	ids["camera"] = glGetUniformLocation(ids["program2"], "camera");
-	ids["projection"] = glGetUniformLocation(ids["program2"], "projection");
-	ids["model"] = glGetUniformLocation(ids["program2"], "model"); 
+	ids["DesX2"] = glGetUniformLocation(ids["program2"], "DesX"); 
+	ids["camera2"] = glGetUniformLocation(ids["program2"], "camera");
+	ids["projection2"] = glGetUniformLocation(ids["program2"], "projection");
+	ids["model2"] = glGetUniformLocation(ids["program2"], "model"); 
 }
 
 void Application::keyCallBack(int key, int scancode, int action, int mods)
@@ -225,15 +270,11 @@ void Application::keyCallBack(int key, int scancode, int action, int mods)
 		currentProgram = !currentProgram;
 		if (currentProgram)
 		{
-			currentProgram = ids["program"];
-			currentProgram = true;
-			std::cout << "Programa 1 activado" << std::endl;
+			std::cout << "Programa 2 activado + CUBO\n " << std::endl;
 		}
 		else
 		{
-			currentProgram = ids["program2"];
-			currentProgram = false;
-			std::cout << "Programa 2 activado" << std::endl;
+			std::cout << "Programa 1 activado + TRIANGULO\n " << std::endl;
 		}
 	}
 }
@@ -282,7 +323,7 @@ void Application::MouseScrollCallback(double xoffset, double yoffset)
 
 void Application::Setup()
 {
-	SetUpGeometry(); // Llamo a la funcion que crea la geometria
+	SetUpTriangleGeometry(); // Llamo a la funcion que crea la geometria
 	SetUpProgram1(); // Llamo a la funcion que crea el programa de shaders
 	SetUpProgram2(); // Llamo a la funcion que crea el programa de shaders con camara
 	SetUpCubeGeometry(); // Llamo a la funcion que crea la geometria del cubo
@@ -308,18 +349,30 @@ void Application::Update()
 
 void Application::Draw()
 {
-	glUseProgram(currentProgram); //Uso el programa de shaders
-	glBindVertexArray(ids["cubo"]); //Digo que geometria voy a usar
-	
-	glUniform1f(ids["time2"], time); //Paso el valor de time al shader
-	glUniform1f(ids["DesX"], DesX); //Paso el valor de DesX al shader
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Limpia el buffer de color y el z-buffer
 
-	glUniformMatrix4fv(ids["model"], 1, GL_FALSE, &model[0][0]);
-	glUniformMatrix4fv(ids["camera"], 1, GL_FALSE, &camera[0][0]); //Paso la matriz de la camara al shader
-	glUniformMatrix4fv(ids["projection"], 1, GL_FALSE, &projection[0][0]); //Paso la matriz de proyeccion al shader
+	const bool useProgram = this->currentProgram;
+	const GLuint programID = useProgram ? ids["program2"] : ids["program"];
+	glUseProgram(programID);
 
+	// Uniforms por programa (usa 1f si 'time' es float en el shader)
+	if (useProgram) {
+		glUniform1f(ids["time2"], (float)time);
+		glUniform1f(ids["DesX2"], DesX);
+		glUniformMatrix4fv(ids["model2"], 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(ids["camera2"], 1, GL_FALSE, &camera[0][0]);
+		glUniformMatrix4fv(ids["projection2"], 1, GL_FALSE, &projection[0][0]);
+	}
+	else {
+		glUniform1f(ids["time1"], (float)time);
+		glUniform1f(ids["DesX1"], DesX);
+		glUniformMatrix4fv(ids["model1"], 1, GL_FALSE, &model[0][0]);
+		glUniformMatrix4fv(ids["camera1"], 1, GL_FALSE, &camera[0][0]);
+		glUniformMatrix4fv(ids["projection1"], 1, GL_FALSE, &projection[0][0]);
+	}
 
-	
-	//Dibujo la geometria del cubo
-	glDrawArrays(GL_TRIANGLES, 0, 36); //Dibujo el cubo 
+	// Elegir VAO correcto (ahora 'triangulo' existe)
+	const GLuint VAO = useProgram ? ids["cubo"] : ids["triangulo"];
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, useProgram ? 36 : 18);
 }

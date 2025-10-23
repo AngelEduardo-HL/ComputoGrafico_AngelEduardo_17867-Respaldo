@@ -17,7 +17,7 @@ private:
 
 	// Refactorizacion de la Geometria que estaba en Setup
 	void SetUpCubeGeometry();
-	void SetUpGeometry();
+	void SetUpTriangleGeometry();
 	void SetUpProgram1();
 	void SetUpProgram2();
 
@@ -31,6 +31,7 @@ private:
 	float pitchRangeDeg = 180.0f;  // de borde a borde de ventana
 
 	bool currentProgram = true; // Programa actual (true: programa 1, false: programa 2)
+	bool currentGeometry = true; // Geometria actual (true: triangulo, false: cubo)
 
 	float zoom = 2.0f; // Escala acual del cubo
 	float zoomSensitivity = 1.1f; // Sensibilidad del zoom
