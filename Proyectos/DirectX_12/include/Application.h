@@ -10,12 +10,10 @@
 #include <vector>
 #include <windows.h>
 
-
 // Librerías de DirectX 12
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <wrl/client.h> // Para Microsoft::WRL::ComPtr
-
 
 #include <map>
 #include <string>
