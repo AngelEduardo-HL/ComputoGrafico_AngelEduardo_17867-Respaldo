@@ -184,9 +184,14 @@ void Application::setup()
 	setupSwapChain();
 	setupDescriptorHeap();
 	setupRenderTargetView();
+
+	// Configurar el Depth Buffer
+	SetUpDepthBuffer();
+		
 	setupCommandAllocator();
 	setupCommandList();
 	setupShaders();
+	
 }
 
 void Application::update()
@@ -205,6 +210,70 @@ void Application::swapBuffers()
 	transitionToPresent.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
 	g_commandList->ResourceBarrier(1, &transitionToPresent);
+}
+
+void Application::SetUpDepthBuffer()
+{
+	// Heap de descriptores para DSV
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	ThrowIfFailed(g_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&g_dsvHeap)),
+		"Error creando DSV Descriptor Heap");
+
+	// Recurso de Depth
+	D3D12_RESOURCE_DESC dsDesc = {};
+	dsDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	dsDesc.Alignment = 0;
+	dsDesc.Width = WINDOW_WIDTH;
+	dsDesc.Height = WINDOW_HEIGHT;
+	dsDesc.DepthOrArraySize = 1;
+	dsDesc.MipLevels = 1;
+	dsDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // común y compatible
+	dsDesc.SampleDesc.Count = 1;
+	dsDesc.SampleDesc.Quality = 0;
+	dsDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	dsDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	// Valor de limpieza (clear) por defecto
+	D3D12_CLEAR_VALUE optClear = {};
+	optClear.Format = dsDesc.Format;
+	optClear.DepthStencil.Depth = 1.0f;
+	optClear.DepthStencil.Stencil = 0;
+
+	// Propiedades del heap del recurso
+	D3D12_HEAP_PROPERTIES heapProps = {};
+	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+	heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapProps.CreationNodeMask = 1;
+	heapProps.VisibleNodeMask = 1;
+
+	// Crear el recurso en estado de escritura de profundidad
+	ThrowIfFailed(
+		g_device->CreateCommittedResource(
+			&heapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&dsDesc,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE, // estado inicial correcto
+			&optClear,
+			IID_PPV_ARGS(&g_depthStencil)
+		),
+		"Error creando recurso Depth/Stencil"
+	);
+
+	// Crear el DSV
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = dsDesc.Format;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+	g_device->CreateDepthStencilView(
+		g_depthStencil.Get(),
+		&dsvDesc,
+		g_dsvHeap->GetCPUDescriptorHandleForHeapStart()
+	);
 }
 
 void Application::draw()

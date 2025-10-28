@@ -39,6 +39,8 @@ private:
 	void setupCommandList();
 	void swapBuffers();
 
+	void SetUpDepthBuffer(); // Configura el búfer de profundidad
+
 	std::string readFile(const std::string& filename);
 
 	// --- Configuración y Constantes ---
@@ -60,8 +62,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> g_renderTargets[BUFFER_COUNT];
 	UINT g_frameIndex;
 	UINT g_rtvDescriptorSize;
-	
 
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>     g_dsvHeap;      
+	Microsoft::WRL::ComPtr<ID3D12Resource>           g_depthStencil; 
 
 public:
 	const int Width{ 1280 };
