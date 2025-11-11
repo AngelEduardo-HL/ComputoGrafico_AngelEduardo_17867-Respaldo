@@ -26,6 +26,24 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
+typedef struct
+{
+	DirectX::XMMATRIX model; //4x4 float = 64 bytes
+	DirectX::XMMATRIX view; //4x4 float = 64 bytes
+	DirectX::XMMATRIX projection; //4x4 float = 64 bytes
+	// Total: 192 bytes
+
+	DirectX::XMVECTOR eye; //16 bytes
+	DirectX::XMVECTOR center; //16 bytes
+	DirectX::XMVECTOR up; //16 bytes
+	// Total: 48 bytes
+	// Total size: 256 bytes
+	UINT triangleAngle;
+
+	float padding[3]; // Padding to make the size a multiple of 16 bytes
+
+}SceneConstants;
+
 class Application
 {
 private:
@@ -33,6 +51,7 @@ private:
 	void ThrowIfFailed(HRESULT hr);
 	void setupGeometry();
 	void setupShaders();
+	void setupConstantBuffer();
 	void setupDevice();
 	void setupCommandQueue();
 	void setupCommandAllocator();
@@ -41,6 +60,7 @@ private:
 	void setupDescriptorHeap();
 	void setupRenderTargetView();
 	void setupSignature();
+	void setupDepthBuffer();
 	void swapBuffers();
 	void setBlendState(D3D12_BLEND_DESC& blend_desc);
 	void setRasterizerState(D3D12_RASTERIZER_DESC& rasterizer_desc);
@@ -64,26 +84,20 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState;
 	Microsoft::WRL::ComPtr<ID3D12Resource> renderTargets[BUFFER_COUNT];
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilBuffer;
+	Microsoft::WRL::ComPtr<ID3D12Resource> constantBuffer;
 	
 	UINT frameIndex{0};
 	UINT rtvIncrementSize;
+	void* mappedMemory;
 
-	// Matrices
-	DirectX::XMMATRIX model;
-	DirectX::XMMATRIX view;
-	DirectX::XMMATRIX projection;
-
-	// Camera parameters
-	DirectX::XMVECTOR eye;
-	DirectX::XMVECTOR center;
-	DirectX::XMVECTOR up;
-
+	SceneConstants sceneConstants;
 
 	unsigned int triangle_angle = 0;
 
 public:
 	const int WINDOW_WIDTH = 1024;
-	const int WINDOW_HEIGHT = 1024;
+	const int WINDOW_HEIGHT = 768;
 	GLFWwindow* window;
 	HWND GetWindowNativeHandler() const;
 	void setup();

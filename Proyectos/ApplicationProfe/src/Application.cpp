@@ -93,20 +93,6 @@ HWND Application::GetWindowNativeHandler() const
 	return glfwGetWin32Window(window);
 }
 
-void Application::setupGeometry()
-{
-	std::vector<float> geometry{
-		// X    Y    Z     W
-		-1.0f,  1.0, 0.0f, 1.0f,  //vertice 1
-		-1.0f, -1.0, 0.0f, 1.0f,  //vertice 2
-		 1.0f, -1.0, 0.0f, 1.0f,  //vertice 3
-
-		1.0f, 0.0f, 0.0f, 1.0f,   //rojo
-		0.0f, 1.0f, 0.0f, 1.0f,   //verde
-		 0.0f, 0.0f, 1.0f, 1.0f   //azul
-	};
-}
-
 void Application::keyCallback(int key, int scancode, int action, int mods)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -120,8 +106,8 @@ void Application::setupShaders()
 	//compile shaders
 	ID3DBlob* vertex_shader = nullptr;
 	ID3DBlob* pixel_shader = nullptr;
-	ThrowIfFailed(D3DCompileFromFile(L"Shaders/shader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &vertex_shader, nullptr), "Error compiling shader 1"); 
-	ThrowIfFailed(D3DCompileFromFile(L"Shaders/shader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &pixel_shader, nullptr), "Error compiling shader 2"); 
+	ThrowIfFailed(D3DCompileFromFile(L"Shaders/shader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &vertex_shader, nullptr), "Error compiling shader 1");
+	ThrowIfFailed(D3DCompileFromFile(L"Shaders/shader.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &pixel_shader, nullptr), "Error compiling shader 2");
 
 	// Pipeline state
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
@@ -150,6 +136,40 @@ void Application::setupShaders()
 	vertex_shader = nullptr;
 	pixel_shader->Release();
 	pixel_shader = nullptr;
+}
+
+void Application::setupConstantBuffer()
+{
+	// Crear un buffer en la GPU con tipo UPLOAD (CPU-write, GPU-read)
+	D3D12_HEAP_PROPERTIES heapProps = {};
+	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+	heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapProps.CreationNodeMask = 1;
+	heapProps.VisibleNodeMask = 1;
+
+	D3D12_RESOURCE_DESC resourceDesc = {};
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	resourceDesc.Width = (sizeof(SceneConstants) + 255) & ~255; // Múltiplo de 256 bytes (requerido)
+	//resourceDesc.Width = sizeof(SceneConstants);
+	resourceDesc.Height = 1;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	device->CreateCommittedResource(
+		&heapProps,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&constantBuffer)
+	);
+	// Copiar al buffer mapeado (ya creado con tipo UPLOAD)
+
+	ThrowIfFailed(constantBuffer->Map(0, nullptr, &mappedMemory), "fallo al copiar las constantes");
+	constantBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mappedMemory));
 }
 
 void Application::setupDevice()
@@ -188,7 +208,7 @@ void Application::setupSwapChain()
 	swapChainDesc.OutputWindow = GetWindowNativeHandler();
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.Windowed = TRUE;
-	
+
 	IDXGISwapChain* tempSwapChain = nullptr;
 	ThrowIfFailed(factory->CreateSwapChain(commandQueue.Get(), &swapChainDesc, &tempSwapChain), "Failed to create swapchain");
 
@@ -206,6 +226,52 @@ void Application::setupDescriptorHeap()
 	rtvHeapDesc.NumDescriptors = 2;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)), "Error creating heap");
+
+}
+
+void Application::setupDepthBuffer()
+{
+	//Depth buffer
+	depthStencilBuffer = nullptr;
+	UINT dstIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+	heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heapProperties.CreationNodeMask = 1;
+	heapProperties.VisibleNodeMask = 1;
+
+
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resourceDesc.Alignment = 0;
+	resourceDesc.Width = WINDOW_WIDTH;
+	resourceDesc.Height = WINDOW_HEIGHT;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.SampleDesc.Quality = 0;
+	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	D3D12_CLEAR_VALUE clearValue{};
+	clearValue.Format = DXGI_FORMAT_D32_FLOAT;
+	clearValue.DepthStencil.Depth = 1.0f;
+	clearValue.DepthStencil.Stencil = 0;
+
+	ThrowIfFailed(device->CreateCommittedResource(
+		&heapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&clearValue,
+		IID_PPV_ARGS(&depthStencilBuffer)),
+		"Failed to create Depth Buffer)");
+
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle(rtvHeap->GetCPUDescriptorHandleForHeapStart());
+	device->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, dsvHandle);
 }
 
 void Application::setupRenderTargetView()
@@ -223,16 +289,13 @@ void Application::setupRenderTargetView()
 	}
 }
 
-
 void Application::setupSignature()
 {
-	//Root signature is like have many object buffers and textures we want to use when drawing.
-	//For our rotating triangle, we only need a single constant that is going to be our angle
+	//Root signature is like have many object buffers and textures we want to use when drawing.	
 	D3D12_ROOT_PARAMETER rootParameters[1] = {};
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	rootParameters[0].Constants.Num32BitValues = 1;
-	rootParameters[0].Constants.ShaderRegister = 0;
-	rootParameters[0].Constants.RegisterSpace = 0;
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[0].Descriptor.ShaderRegister = 0; // register(b0)
+	rootParameters[0].Descriptor.RegisterSpace = 0;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
 	rootSignature = nullptr;
@@ -246,7 +309,7 @@ void Application::setupSignature()
 	ID3DBlob* signatureBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
 	ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob), "Error creating signature 1");
-		ThrowIfFailed(device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature)), "Error creating signature 2");
+	ThrowIfFailed(device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature)), "Error creating signature 2");
 
 	if (signatureBlob) {
 		signatureBlob->Release();
@@ -269,30 +332,39 @@ void Application::setupCommandAllocator()
 void Application::setupCommandList()
 {
 	//command list is used to store a list of commands that we want to execute on the GPU
-	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)), 
+	ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList)),
 		"Failed to create Command list");
 	ThrowIfFailed(commandList->Close(), "Failed to close Commandlist");
 }
 
 void Application::update()
 {
-	eye = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
-	center = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	sceneConstants.triangleAngle++;
+	sceneConstants.eye = DirectX::XMVectorSet(0.0f, 0.0f, -3.0f, 1.0f); // Posición de la cámara
+	sceneConstants.center = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);  // Punto al que mira
+	sceneConstants.up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);    // Vector 'Up'
 
-	view = DirectX::XMMatrixLookAtLH(eye, center, up);
+	sceneConstants.view = XMMatrixTranspose(DirectX::XMMatrixLookAtLH(sceneConstants.eye, sceneConstants.center, sceneConstants.up));
 
-	//(Fov, Aspect Ratio, Near Plane, Far Plane)
-	projection = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(60.0f),WINDOW_HEIGHT/WINDOW_WIDTH, 0.1f, 1000.0f);
-	DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f);
-	model = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(triangle_angle));
+	//Fov, AspectRatio, NearPlane, FarPlane
+	float aspect = static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT);
+	//sceneConstants.projection = XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(
+	//	DirectX::XMConvertToRadians(45.0f), 
+	//	aspect, 
+	//	0.1f, 
+	//	1000.0f));
+
+	sceneConstants.projection = DirectX::XMMatrixIdentity();//XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(1024.0f, 768.0f, 0.1f, 1000.0f));
+	DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(1.0f, 0.0, 0.0f, 1.0f);
+	//sceneConstants.model = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(triangle_angle));
+	sceneConstants.model = XMMatrixTranspose(DirectX::XMMatrixScaling(0.5f, .5f, .5f));
 }
 
 void Application::draw()
 {
 	// Record commands to draw a triangle
-	UINT h = commandAllocator->Reset();
-	h = commandList->Reset(commandAllocator.Get(), nullptr);
+	ThrowIfFailed(commandAllocator->Reset());
+	ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
 
 	UINT back_buffer_index = swapChain->GetCurrentBackBufferIndex();
 
@@ -316,7 +388,7 @@ void Application::draw()
 
 	// Set viewport and scissor
 	D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT), 0.0f, 1.0f };
-	D3D12_RECT scissor_rect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT }; //Evita que se dibuje fuera de la ventana
+	D3D12_RECT scissor_rect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissor_rect);
 	commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
@@ -324,17 +396,17 @@ void Application::draw()
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 	commandList->SetPipelineState(pipelineState.Get());
 
-	commandList->SetGraphicsRoot32BitConstant(0, triangle_angle, 0);
 
-	commandList->DrawInstanced(3, 1, 0, 0);
-	
-	int triangle_angle2 = 0;
 
-	//Pass parameters
-	commandList->SetGraphicsRoot32BitConstant(0, triangle_angle2, 0); // set the angle parameter
+	// Copiar los datos de la estructura al constant buffer
+	memcpy(mappedMemory, &sceneConstants, sizeof(SceneConstants));
 
-	commandList->DrawInstanced(3, 1, 0, 0);
+	//commandList->SetGraphicsRootSignature(rootSignature.Get());
+	commandList->SetGraphicsRootConstantBufferView(0, constantBuffer->GetGPUVirtualAddress());
+
+
 	// Draw the triangle
+	commandList->DrawInstanced(3, 1, 0, 0);
 
 	{
 		D3D12_RESOURCE_BARRIER barrier = {};
@@ -347,18 +419,17 @@ void Application::draw()
 		commandList->ResourceBarrier(1, &barrier);
 	}
 
-	h = commandList->Close();
+	ThrowIfFailed(commandList->Close());
 
-	ID3D12CommandList* commandLists[] = { commandList.Get()};
+	ID3D12CommandList* commandLists[] = { commandList.Get() };
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
-	h = swapChain->Present(1, 0);
+	ThrowIfFailed(swapChain->Present(1, 0));
 
 }
 
 void Application::setup()
 {
-	setupGeometry();
 	//Inicializa DirectX 12
 	// Crear el DXGI Factory		
 	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&factory)), "Error creating Factory");
@@ -368,7 +439,9 @@ void Application::setup()
 	setupCommandList();
 	setupSwapChain();
 	setupDescriptorHeap();
+	setupDepthBuffer();
 	setupRenderTargetView();
 	setupSignature();
 	setupShaders();
+	setupConstantBuffer();
 }

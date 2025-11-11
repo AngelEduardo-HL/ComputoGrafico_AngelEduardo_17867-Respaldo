@@ -32,6 +32,7 @@ HWND Application::GetWindowNativeHandler() const
 	return glfwGetWin32Window(window);
 }
 
+
 void Application::setupGeometry()
 {
 	std::vector<float> geometry{
