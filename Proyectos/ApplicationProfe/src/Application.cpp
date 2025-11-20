@@ -355,9 +355,9 @@ void Application::update()
 	//	1000.0f));
 
 	sceneConstants.projection = DirectX::XMMatrixIdentity();//XMMatrixTranspose(DirectX::XMMatrixOrthographicLH(1024.0f, 768.0f, 0.1f, 1000.0f));
-	DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(1.0f, 0.0, 0.0f, 1.0f);
-	//sceneConstants.model = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(triangle_angle));
-	sceneConstants.model = XMMatrixTranspose(DirectX::XMMatrixScaling(0.5f, .5f, .5f));
+	DirectX::XMVECTOR rotationAxis = DirectX::XMVectorSet(1.0f, 0.0, 0.0f, 1.0f); //eje de rotación
+	sceneConstants.model = DirectX::XMMatrixRotationAxis(rotationAxis, DirectX::XMConvertToRadians(triangle_angle));
+	//sceneConstants.model = XMMatrixTranspose(DirectX::XMMatrixScaling(0.5f, .5f, .5f)); //
 }
 
 void Application::draw()

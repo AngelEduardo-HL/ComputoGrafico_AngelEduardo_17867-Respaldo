@@ -253,9 +253,9 @@ void Application::setupSignature() {
 
 void Application::setupShaders() {
     Microsoft::WRL::ComPtr<ID3DBlob> vs, ps;
-    ThrowIfFailed(D3DCompileFromFile(L"shaderConejo.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &vs, nullptr),
+    ThrowIfFailed(D3DCompileFromFile(L"Shaders/shaderConejo.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &vs, nullptr),
         "Compile VS");
-    ThrowIfFailed(D3DCompileFromFile(L"shaderConejo.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &ps, nullptr),
+    ThrowIfFailed(D3DCompileFromFile(L"Shaders/shaderConejo.hlsl", nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &ps, nullptr),
         "Compile PS");
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pso = {};
@@ -416,20 +416,21 @@ void Application::setup() {
 
 void Application::update() {
     sceneConstants.triangleAngle++;
-    sceneConstants.eye = XMVectorSet(0.0f, 0.0f, -3.0f, 1.0f);
-    sceneConstants.center = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-    sceneConstants.up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    sceneConstants.eye = XMVectorSet(0.0f, 0.0f, -3.0f, 1.0f); // Posición de la cámara
+    sceneConstants.center = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);  // Punto al que mira
+    sceneConstants.up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);    // Vector 'Up'
 
     sceneConstants.view = XMMatrixLookAtLH(sceneConstants.eye, sceneConstants.center, sceneConstants.up);
 
     float aspect = static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT);
-    sceneConstants.projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f), aspect, 0.1f, 1000.0f);
+	sceneConstants.projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f), aspect, 0.1f, 1000.0f); // Proyección
 
-    XMVECTOR axis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-    float angleRad = XMConvertToRadians((float)(sceneConstants.triangleAngle % 360));
-    sceneConstants.model = XMMatrixRotationAxis(axis, angleRad) * XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	// Modelo: rotación alrededor del eje Y sin angulo variable
+	XMVECTOR axis = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f); // Eje Y
+	float angleRad = XMConvertToRadians((float)(sceneConstants.triangleAngle % 360)); // Ángulo en radianes
+    sceneConstants.model = XMMatrixRotationAxis(axis,angleRad) * XMConvertToRadians(sceneConstants.triangleAngle);
 
-    memcpy(mappedMemory, &sceneConstants, sizeof(SceneConstants));
+    memcpy(mappedMemory, &sceneConstants, sizeof(SceneConstants));// Sizeof es la cantidad de bits a copiar
 }
 
 void Application::draw() {

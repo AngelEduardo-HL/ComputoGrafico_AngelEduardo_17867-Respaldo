@@ -19,7 +19,7 @@ int main(void)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    app.window = glfwCreateWindow(app.WINDOW_WIDTH, app.WINDOW_HEIGHT, "DX12 — Estructura (OBJ + CBV)", nullptr, nullptr);
+    app.window = glfwCreateWindow(app.WINDOW_WIDTH, app.WINDOW_HEIGHT, "Conejo que Gira JAJAJAJ", nullptr, nullptr);
     if (!app.window) { glfwTerminate(); return -1; }
 
     glfwMakeContextCurrent(app.window);

@@ -69,7 +69,7 @@ private:
     void setupRenderTargetView();      // Crea RTVs de los back buffers
     void setupDepthBuffer();           // Crea DepthBuffer + DSV
     void setupSignature();             // Crea RootSignature (CBV b0)
-    void uploadStaticBuffers();        // Copia de upload -> default con barreras
+	void uploadStaticBuffers();        // Sube VB/IB a memoria GPU
     void waitGPU();                    // Sincronización (Fence)
 
     // Estados fijos
@@ -81,10 +81,8 @@ private:
     std::string readFile(const std::string& filename);
     HWND GetWindowNativeHandler() const;
 
-    // Carga de modelo .obj (formato v ... vn ... f v//vn ...)
     Model load_model_from_obj(const std::string& path);
 
-    // --- Configuración y Constantes ---
     static const UINT BUFFER_COUNT = 2; // Double buffering
 
     // --- DXGI / D3D12 ---
