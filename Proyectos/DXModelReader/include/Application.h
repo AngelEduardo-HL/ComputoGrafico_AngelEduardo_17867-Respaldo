@@ -72,6 +72,17 @@ private:
 	void uploadStaticBuffers();        // Sube VB/IB a memoria GPU
     void waitGPU();                    // Sincronización (Fence)
 
+    float mouseSensitivity = 1.5f;
+	float yaw = 0.0f;
+	float pitch = 0.0f;
+	float yawRangeDeg = 180.f;
+    float pitchRangeDeg = 180.0f; // de borde a borde de la ventana
+
+	float zoom = 2.0f;
+	float zoomSensitivity = 1.1f;
+	float minZoom = 1.5f;
+	float maxZoom = 20.0f;
+
     // Estados fijos
     void setBlendState(D3D12_BLEND_DESC& blend_desc);
     void setRasterizerState(D3D12_RASTERIZER_DESC& rasterizer_desc);
@@ -134,4 +145,6 @@ public:
     void update();
     void draw();
     void keyCallback(int key, int scancode, int action, int mods);
+	void mouseCallback(double xpos, double ypos);
+	void mouseScrollCallback(double xoffset, double yoffset);
 };

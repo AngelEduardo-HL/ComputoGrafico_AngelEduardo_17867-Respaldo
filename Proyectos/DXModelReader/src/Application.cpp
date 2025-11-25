@@ -1,8 +1,10 @@
 #include "Application.h"
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 using namespace DirectX;
+
 
 void Application::ThrowIfFailed(HRESULT hr, const std::string& msg) {
     if (FAILED(hr)) throw std::runtime_error(msg);
@@ -19,6 +21,49 @@ HWND Application::GetWindowNativeHandler() const { return glfwGetWin32Window(win
 void Application::keyCallback(int key, int, int action, int) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+}
+
+void Application::mouseCallback(double mouseX, double mouseY)
+{
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+
+    int winW, winH;
+    
+    glfwGetWindowSize(window, &winW, &winH);
+
+    if (winW <= 0) winW = 1;
+    if (winH <= 0) winH = 1;
+
+    if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) pitch = -89.0f;
+
+    float nx = 2.0f * float(mouseX) / float(winW) - 1.0f;
+    float ny = -2.0f * float(mouseY) / float(winH) + 1.0f;
+
+    yaw = -nx * (yawRangeDeg * 0.5f) * mouseSensitivity;
+    pitch = -ny * (pitchRangeDeg * 0.5f) * mouseSensitivity;
+
+	std::cout << "Mouse X: " << mouseX << " Mouse Y: " << mouseY << std::endl;
+
+}
+
+void Application::mouseScrollCallback(double xoffset, double yoffset)
+{
+    if (yoffset > 0) // Zoom in
+    {
+        zoom /= zoomSensitivity;
+    }
+    else if (yoffset < 0) // Zoom out
+    {
+        zoom *= zoomSensitivity;
+    }
+
+	if (zoom < minZoom) zoom = minZoom;
+	if (zoom > maxZoom) zoom = maxZoom;
+
+	//Nota: no me dejo usar el std::clamp por alguna razon
+
+	std::cout << "Zoom: " << zoom << std::endl;
 }
 
 void Application::setBlendState(D3D12_BLEND_DESC& d) {
@@ -416,9 +461,10 @@ void Application::setup() {
 
 void Application::update() {
     sceneConstants.triangleAngle++;
-    sceneConstants.eye = XMVectorSet(0.0f, 0.0f, -3.0f, 1.0f); // Posición de la cámara
+	float cameraZ = zoom; // Distancia de la cámara al origen
+    sceneConstants.eye = XMVectorSet(0.0f, 0.0f, cameraZ, 1.0f); // Posición de la cámara
     sceneConstants.center = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);  // Punto al que mira
-    sceneConstants.up = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);    // Vector 'Up'
+    sceneConstants.up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);    // Vector 'Up'
 
     sceneConstants.view = XMMatrixLookAtLH(sceneConstants.eye, sceneConstants.center, sceneConstants.up);
 
@@ -427,8 +473,13 @@ void Application::update() {
 
 	// Modelo: rotación alrededor del eje Y sin angulo variable
 	XMVECTOR axis = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f); // Eje Y
-	float angleRad = XMConvertToRadians((float)(sceneConstants.triangleAngle % 360)); // Ángulo en radianes
-    sceneConstants.model = XMMatrixRotationAxis(axis,angleRad) * XMConvertToRadians(sceneConstants.triangleAngle);
+	//float angleRad = XMConvertToRadians((float)(sceneConstants.triangleAngle % 360)); // Ángulo en radianes
+    //sceneConstants.model = XMMatrixRotationAxis(axis,angleRad) * XMConvertToRadians(sceneConstants.triangleAngle); // totacion segun el Triangle Angle
+
+	//rota el modelo según el movimiento del mouse
+	XMMATRIX rotY = XMMatrixRotationY(XMConvertToRadians(yaw));
+	XMMATRIX rotX = XMMatrixRotationX(XMConvertToRadians(pitch));
+	sceneConstants.model = rotX * rotY;
 
     memcpy(mappedMemory, &sceneConstants, sizeof(SceneConstants));// Sizeof es la cantidad de bits a copiar
 }
